@@ -1,7 +1,8 @@
 import { requireAdmin } from '@/lib/auth'
 import { getOwnedServer } from '@/lib/servers'
 import { prisma } from '@/lib/prisma'
-import { retryMirrorAction, retryAiTagAction } from './actions'
+import { retryMirrorAction, retryAiTagAction, retryStuckReportAction } from './actions'
+import { isStuckProcessing } from '@/lib/discord/retry'
 
 const statusColor: Record<string, string> = {
   RECEIVED: 'text-neutral-400',
@@ -34,14 +35,24 @@ export default async function ServerLogPage({ params }: { params: Promise<{ id: 
               {i.aiTag && <span className="rounded bg-neutral-800 px-1.5 py-0.5 text-xs">{i.aiTag}</span>}
               {i.aiFailed && <span className="text-xs text-amber-500">AI failed, rule-only</span>}
               {i.mirrorStatus === 'FAILED' && <span className="text-xs text-red-400">mirror failed</span>}
+              {isStuckProcessing(i) && <span className="text-xs text-amber-500">stuck processing</span>}
               {i.retryCount > 0 && <span className="text-xs text-neutral-500">retries: {i.retryCount}</span>}
               <span className="ml-auto text-neutral-500">{i.createdAt.toLocaleString()}</span>
             </div>
 
             {i.aiSummary && <p className="mt-1 text-neutral-300">{i.aiSummary}</p>}
 
-            {(i.mirrorStatus === 'FAILED' || i.aiFailed) && (
+            {(i.mirrorStatus === 'FAILED' || i.aiFailed || isStuckProcessing(i)) && (
               <div className="mt-2 flex gap-2">
+                {isStuckProcessing(i) && (
+                  <form action={retryStuckReportAction}>
+                    <input type="hidden" name="interactionId" value={i.id} />
+                    <input type="hidden" name="serverId" value={server.id} />
+                    <button className="rounded bg-neutral-800 px-2 py-1 text-xs hover:bg-neutral-700">
+                      Retry report
+                    </button>
+                  </form>
+                )}
                 {i.mirrorStatus === 'FAILED' && (
                   <form action={retryMirrorAction}>
                     <input type="hidden" name="interactionId" value={i.id} />

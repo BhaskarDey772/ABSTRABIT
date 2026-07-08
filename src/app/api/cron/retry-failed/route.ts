@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { retryMirror, retryAiTag } from '@/lib/discord/retry'
+import { retryMirror, retryAiTag, retryStuckReport } from '@/lib/discord/retry'
+
+const STUCK_THRESHOLD_MS = 5 * 60 * 1000
 
 /**
  * Daily safety-net sweep (Vercel Hobby cron is capped at once/day) for anything
@@ -13,7 +15,7 @@ export async function GET(request: Request) {
     return new NextResponse('unauthorized', { status: 401 })
   }
 
-  const [failedMirrors, failedAi] = await Promise.all([
+  const [failedMirrors, failedAi, stuckReports] = await Promise.all([
     prisma.interaction.findMany({
       where: { mirrorStatus: 'FAILED', retryCount: { lt: 5 } },
       include: { server: true },
@@ -24,15 +26,27 @@ export async function GET(request: Request) {
       include: { server: true },
       take: 100,
     }),
+    prisma.interaction.findMany({
+      where: {
+        status: 'PROCESSING',
+        createdAt: { lt: new Date(Date.now() - STUCK_THRESHOLD_MS) },
+        retryCount: { lt: 5 },
+      },
+      include: { server: true },
+      take: 100,
+    }),
   ])
 
   const mirrorResults = await Promise.all(failedMirrors.map((i) => retryMirror(i)))
   const aiResults = await Promise.all(failedAi.map((i) => retryAiTag(i)))
+  const stuckResults = await Promise.all(stuckReports.map((i) => retryStuckReport(i)))
 
   return NextResponse.json({
     mirrorRetried: failedMirrors.length,
     mirrorFixed: mirrorResults.filter((r) => r.ok).length,
     aiRetried: failedAi.length,
     aiFixed: aiResults.filter((r) => r.ok).length,
+    stuckRetried: stuckReports.length,
+    stuckFixed: stuckResults.filter((r) => r.ok).length,
   })
 }

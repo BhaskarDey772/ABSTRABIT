@@ -2,9 +2,12 @@ import { prisma } from '@/lib/prisma'
 import { sendMirror } from '@/lib/mirror'
 import { triageReport } from '@/lib/ai/nim'
 import { applyFlagKeywordsRule } from '@/lib/discord/rules'
+import { processReport } from '@/lib/discord/commands/report'
+import type { DiscordInteraction } from '@/lib/discord/types'
 import type { Interaction, Server } from '@prisma/client'
 
 const MAX_RETRIES = 5
+const STUCK_THRESHOLD_MS = 5 * 60 * 1000
 
 /** Re-sends a failed mirror notification. Shared by the manual dashboard button and the daily cron sweep. */
 export async function retryMirror(interaction: Interaction & { server: Server }) {
@@ -64,4 +67,27 @@ export async function retryAiTag(interaction: Interaction & { server: Server }) 
   })
 
   return failed ? { ok: false as const, reason: 'AI still unavailable' } : { ok: true as const }
+}
+
+export function isStuckProcessing(interaction: Interaction): boolean {
+  return interaction.status === 'PROCESSING' && Date.now() - interaction.createdAt.getTime() > STUCK_THRESHOLD_MS
+}
+
+/**
+ * Re-drives a /report whose background processing (the after() callback in
+ * handleReportModalSubmit) never reached a terminal state — observed in dev when
+ * a file-change hot-reload interrupts the in-flight callback; the same gap would
+ * open in production if the function crashed or was recycled mid-request. Safe to
+ * re-run: AI/mirror aren't side-effecting on our end, and editing the original
+ * Discord reply is a no-op past its ~15min token window (caught and logged
+ * inside processReport, not thrown) rather than something that duplicates output.
+ */
+export async function retryStuckReport(interaction: Interaction & { server: Server }) {
+  if (interaction.retryCount >= MAX_RETRIES) {
+    return { ok: false as const, reason: 'max retries reached' }
+  }
+
+  await prisma.interaction.update({ where: { id: interaction.id }, data: { retryCount: { increment: 1 } } })
+  await processReport(interaction.rawPayload as unknown as DiscordInteraction, interaction.server, interaction)
+  return { ok: true as const }
 }

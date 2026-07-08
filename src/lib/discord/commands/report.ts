@@ -62,7 +62,8 @@ export async function handleReportModalSubmit(
   return Response.json({ type: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE })
 }
 
-async function processReport(interaction: DiscordInteraction, server: Server, interactionRow: Interaction) {
+/** Exported so a stuck/never-completed PROCESSING row can be re-driven manually or by the cron sweep. */
+export async function processReport(interaction: DiscordInteraction, server: Server, interactionRow: Interaction) {
   const text = extractModalText(interaction)
 
   const config = await prisma.commandConfig.findUnique({
