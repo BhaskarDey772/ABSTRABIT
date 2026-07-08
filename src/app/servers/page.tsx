@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Plus, ChevronRight } from 'lucide-react'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { buttonVariants } from '@/components/ui/button'
@@ -17,7 +18,8 @@ export default async function ServersPage() {
           title="Connected servers"
           description="Discord servers you administer through this dashboard."
         />
-        <Link href="/servers/connect" className={buttonVariants()}>
+        <Link href="/servers/connect" className={buttonVariants({ className: 'gap-1.5' })}>
+          <Plus className="size-4" />
           Connect a server
         </Link>
       </div>
@@ -33,15 +35,18 @@ export default async function ServersPage() {
           {servers.map((s) => (
             <Link key={s.id} href={`/servers/${s.id}/log`}>
               <Card className="transition-colors hover:border-primary/50">
-                <CardHeader>
-                  <CardTitle className="text-base">{s.guildName}</CardTitle>
-                  <CardDescription className="flex items-center gap-2">
-                    {s.mirrorWebhookUrl ? (
-                      <Badge variant="secondary">{s.mirrorType} mirror configured</Badge>
-                    ) : (
-                      <Badge variant="outline">Mirror not configured yet</Badge>
-                    )}
-                  </CardDescription>
+                <CardHeader className="flex-row items-center justify-between space-y-0">
+                  <div>
+                    <CardTitle className="text-base">{s.guildName}</CardTitle>
+                    <CardDescription className="mt-1.5 flex items-center gap-2">
+                      {s.mirrorWebhookUrl ? (
+                        <Badge variant="secondary">{s.mirrorType} mirror configured</Badge>
+                      ) : (
+                        <Badge variant="outline">Mirror not configured yet</Badge>
+                      )}
+                    </CardDescription>
+                  </div>
+                  <ChevronRight className="size-4 text-muted-foreground" />
                 </CardHeader>
               </Card>
             </Link>

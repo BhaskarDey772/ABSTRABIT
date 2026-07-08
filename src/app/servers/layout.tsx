@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Plus, LogOut, Bot } from 'lucide-react'
 import { requireAdmin } from '@/lib/auth'
 import { signOutAction } from './actions'
 import { prisma } from '@/lib/prisma'
@@ -21,7 +22,7 @@ export default async function ServersRootLayout({ children }: { children: React.
             key={s.id}
             href={`/servers/${s.id}/log`}
             title={s.guildName}
-            className="flex size-12 items-center justify-center rounded-3xl bg-secondary text-sm font-semibold text-secondary-foreground transition-all hover:rounded-2xl hover:bg-primary hover:text-primary-foreground"
+            className="flex size-12 items-center justify-center rounded-3xl bg-secondary text-sm font-semibold text-secondary-foreground shadow-sm transition-all hover:rounded-2xl hover:bg-primary hover:text-primary-foreground"
           >
             {initials(s.guildName)}
           </Link>
@@ -30,22 +31,24 @@ export default async function ServersRootLayout({ children }: { children: React.
         <Link
           href="/servers/connect"
           title="Connect a server"
-          className="flex size-12 items-center justify-center rounded-3xl bg-secondary text-lg text-emerald-400 transition-all hover:rounded-2xl hover:bg-emerald-500 hover:text-white"
+          className="flex size-12 items-center justify-center rounded-3xl bg-secondary text-emerald-400 shadow-sm transition-all hover:rounded-2xl hover:bg-emerald-500 hover:text-white"
         >
-          +
+          <Plus className="size-5" />
         </Link>
       </aside>
 
       <div className="flex-1">
         <header className="border-b border-border bg-card/40">
           <div className="flex items-center justify-between px-10 py-4">
-            <Link href="/servers" className="font-semibold">
+            <Link href="/servers" className="flex items-center gap-2 font-semibold">
+              <Bot className="size-5 text-primary" />
               Discord Bot Admin
             </Link>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span>{admin.discordUsername}</span>
               <form action={signOutAction}>
                 <SubmitButton variant="outline" size="sm" pendingText="Signing out…">
+                  <LogOut className="size-4" />
                   Sign out
                 </SubmitButton>
               </form>

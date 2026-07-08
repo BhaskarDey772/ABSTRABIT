@@ -1,3 +1,4 @@
+import { ExternalLink, Check } from 'lucide-react'
 import { requireAdmin } from '@/lib/auth'
 import { fetchManageableGuilds, fetchBotGuildIds } from '@/lib/discord/api'
 import { buildBotInviteUrl } from '@/lib/discord/inviteUrl'
@@ -41,7 +42,8 @@ export default async function ConnectServerPage() {
                   <form action={connectServer}>
                     <input type="hidden" name="guildId" value={g.id} />
                     <input type="hidden" name="guildName" value={g.name} />
-                    <SubmitButton size="sm" pendingText="Connecting…">
+                    <SubmitButton size="sm" pendingText="Connecting…" className="gap-1.5">
+                      <Check className="size-4" />
                       Connect
                     </SubmitButton>
                   </form>
@@ -50,9 +52,10 @@ export default async function ConnectServerPage() {
                     href={buildBotInviteUrl(g.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm text-primary underline underline-offset-4"
+                    className="inline-flex items-center gap-1.5 text-sm text-primary underline underline-offset-4"
                   >
                     Invite the bot first
+                    <ExternalLink className="size-3.5" />
                   </a>
                 )}
               </CardContent>

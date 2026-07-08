@@ -1,3 +1,4 @@
+import { Save, SlidersHorizontal } from 'lucide-react'
 import { requireAdmin } from '@/lib/auth'
 import { getOwnedServer } from '@/lib/servers'
 import { prisma } from '@/lib/prisma'
@@ -82,13 +83,19 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
               />
             </div>
 
-            <SubmitButton>Save</SubmitButton>
+            <SubmitButton className="gap-1.5">
+              <Save className="size-4" />
+              Save
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold">Commands</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+          <SlidersHorizontal className="size-4 text-muted-foreground" />
+          Commands
+        </h2>
         <div className="space-y-4">
           {commands.map((c) => (
             <Card key={c.id}>
@@ -144,7 +151,10 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
                     />
                   </div>
 
-                  <SubmitButton>Save</SubmitButton>
+                  <SubmitButton className="gap-1.5">
+                    <Save className="size-4" />
+                    Save
+                  </SubmitButton>
                 </form>
               </CardContent>
             </Card>
