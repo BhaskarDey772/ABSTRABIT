@@ -3,10 +3,11 @@ import { getOwnedServer } from '@/lib/servers'
 import { prisma } from '@/lib/prisma'
 import { fetchGuildChannels } from '@/lib/discord/api'
 import { updateServerSettings, updateCommandConfig } from './actions'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/submit-button'
+import { PageHeader } from '@/components/page-header'
 
 const TEXT_CHANNEL = 0
 
@@ -25,10 +26,13 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
   const textChannels = channels.filter((c) => c.type === TEXT_CHANNEL)
 
   return (
-    <div className="space-y-8">
+    <div>
+      <PageHeader title="Configuration" description={`Reply channel, mirror target, and per-command behavior for ${server.guildName}.`} />
+      <div className="space-y-8">
       <Card>
         <CardHeader>
           <CardTitle>Server settings</CardTitle>
+          <CardDescription>Where the bot replies and mirrors notifications.</CardDescription>
         </CardHeader>
         <CardContent>
           <form action={updateServerSettings} className="space-y-4">
@@ -70,7 +74,7 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
               />
             </div>
 
-            <Button type="submit">Save</Button>
+            <SubmitButton>Save</SubmitButton>
           </form>
         </CardContent>
       </Card>
@@ -130,12 +134,13 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
                     />
                   </div>
 
-                  <Button type="submit">Save</Button>
+                  <SubmitButton>Save</SubmitButton>
                 </form>
               </CardContent>
             </Card>
           ))}
         </div>
+      </div>
       </div>
     </div>
   )

@@ -66,7 +66,12 @@ export async function POST(req: Request) {
   }
 
   if (interaction.type === InteractionType.MODAL_SUBMIT) {
-    const { isNew, row } = await recordOrReplay(interaction, server.id)
+    // ackType/status set in this same insert (not a follow-up update) — one
+    // write instead of two on the path racing Discord's 3s deadline.
+    const { isNew, row } = await recordOrReplay(interaction, server.id, {
+      ackType: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+      status: 'PROCESSING',
+    })
     return handleReportModalSubmit(interaction, server, row, isNew)
   }
 

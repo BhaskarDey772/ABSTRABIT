@@ -5,7 +5,8 @@ import { retryMirrorAction, retryAiTagAction, retryStuckReportAction } from './a
 import { isStuckProcessing } from '@/lib/discord/retry'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/submit-button'
+import { PageHeader } from '@/components/page-header'
 
 const statusVariant: Record<string, 'secondary' | 'outline' | 'default' | 'destructive'> = {
   RECEIVED: 'outline',
@@ -27,8 +28,8 @@ export default async function ServerLogPage({ params }: { params: Promise<{ id: 
 
   return (
     <div>
-      <h1 className="mb-4 text-lg font-semibold">{server.guildName} — command log</h1>
-      <div className="space-y-2">
+      <PageHeader title={`${server.guildName} — command log`} description="Every interaction the bot has received for this server, most recent first." />
+      <div className="space-y-3">
         {interactions.length === 0 && <p className="text-muted-foreground">Nothing logged yet.</p>}
         {interactions.map((i) => (
           <Card key={i.id}>
@@ -54,27 +55,27 @@ export default async function ServerLogPage({ params }: { params: Promise<{ id: 
                     <form action={retryStuckReportAction}>
                       <input type="hidden" name="interactionId" value={i.id} />
                       <input type="hidden" name="serverId" value={server.id} />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton variant="secondary" size="sm" pendingText="Retrying…">
                         Retry report
-                      </Button>
+                      </SubmitButton>
                     </form>
                   )}
                   {i.mirrorStatus === 'FAILED' && (
                     <form action={retryMirrorAction}>
                       <input type="hidden" name="interactionId" value={i.id} />
                       <input type="hidden" name="serverId" value={server.id} />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton variant="secondary" size="sm" pendingText="Retrying…">
                         Retry mirror
-                      </Button>
+                      </SubmitButton>
                     </form>
                   )}
                   {i.aiFailed && (
                     <form action={retryAiTagAction}>
                       <input type="hidden" name="interactionId" value={i.id} />
                       <input type="hidden" name="serverId" value={server.id} />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton variant="secondary" size="sm" pendingText="Retrying…">
                         Retry AI tagging
-                      </Button>
+                      </SubmitButton>
                     </form>
                   )}
                 </div>

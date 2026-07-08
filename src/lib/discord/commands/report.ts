@@ -52,11 +52,8 @@ export async function handleReportModalSubmit(
     return Response.json({ type: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE })
   }
 
-  await prisma.interaction.update({
-    where: { id: interactionRow.id },
-    data: { ackType: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, status: 'PROCESSING' },
-  })
-
+  // ackType/status were already set on this row by recordOrReplay's insert
+  // (route.ts) — no update needed here before responding.
   after(() => processReport(interaction, server, interactionRow))
 
   return Response.json({ type: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE })

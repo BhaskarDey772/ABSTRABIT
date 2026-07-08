@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Separator } from '@/components/ui/separator'
+import { ServerTabs } from './server-tabs'
 
 export default async function ServerLayout({
   children,
@@ -11,19 +11,13 @@ export default async function ServerLayout({
   const { id } = await params
 
   return (
-    <main className="mx-auto max-w-3xl p-8">
-      <nav className="mb-6 flex items-center gap-4 text-sm">
-        <Link href={`/servers/${id}/log`} className="text-foreground hover:text-primary">
-          Log
-        </Link>
-        <Link href={`/servers/${id}/config`} className="text-foreground hover:text-primary">
-          Config
-        </Link>
-        <Link href="/servers" className="ml-auto text-muted-foreground hover:text-foreground">
-          ← All servers
-        </Link>
-      </nav>
-      <Separator className="mb-6" />
+    <main className="mx-auto max-w-4xl px-10 py-8">
+      <Link href="/servers" className="mb-4 inline-block text-sm text-muted-foreground hover:text-foreground">
+        ← All servers
+      </Link>
+      <div className="mb-8">
+        <ServerTabs id={id} />
+      </div>
       {children}
     </main>
   )

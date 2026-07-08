@@ -4,15 +4,19 @@ import { prisma } from '@/lib/prisma'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/page-header'
 
 export default async function ServersPage() {
   const admin = await requireAdmin()
   const servers = await prisma.server.findMany({ where: { connectedById: admin.id } })
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Connected servers</h1>
+    <main className="mx-auto max-w-4xl px-10 py-8">
+      <div className="mb-8 flex items-start justify-between">
+        <PageHeader
+          title="Connected servers"
+          description="Discord servers you administer through this dashboard."
+        />
         <Link href="/servers/connect" className={buttonVariants()}>
           Connect a server
         </Link>
