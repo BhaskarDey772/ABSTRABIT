@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.env
+.env.local
+*.env
+ai-api.txt
+.vercel/
+coverage/
+*.tsbuildinfo
+.DS_Store
