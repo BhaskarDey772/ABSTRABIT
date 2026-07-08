@@ -11,7 +11,8 @@ export async function updateServerSettings(formData: FormData) {
   const serverId = String(formData.get('serverId'))
   await getOwnedServer(admin, serverId)
 
-  const replyChannelId = String(formData.get('replyChannelId') || '') || null
+  const replyChannelIdRaw = String(formData.get('replyChannelId') || '')
+  const replyChannelId = replyChannelIdRaw && replyChannelIdRaw !== 'none' ? replyChannelIdRaw : null
   const mirrorType = String(formData.get('mirrorType')) as MirrorType
   const mirrorWebhookUrl = String(formData.get('mirrorWebhookUrl') || '') || null
 

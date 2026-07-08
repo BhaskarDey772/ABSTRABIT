@@ -1,5 +1,6 @@
 import type { ElementType } from 'react'
-import { CheckCircle2, XCircle, Clock, Loader2, RefreshCw, AlertTriangle } from 'lucide-react'
+import Link from 'next/link'
+import { CheckCircle2, XCircle, Clock, Loader2, RefreshCw, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { requireAdmin } from '@/lib/auth'
 import { getOwnedServer } from '@/lib/servers'
 import { prisma } from '@/lib/prisma'
@@ -8,7 +9,11 @@ import { isStuckProcessing } from '@/lib/discord/retry'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { SubmitButton } from '@/components/submit-button'
+import { buttonVariants } from '@/components/ui/button'
 import { PageHeader } from '@/components/page-header'
+import { cn } from '@/lib/utils'
+
+const PAGE_SIZE = 20
 
 const statusVariant: Record<string, 'secondary' | 'outline' | 'default' | 'destructive'> = {
   RECEIVED: 'outline',
@@ -24,16 +29,30 @@ const statusIcon: Record<string, ElementType> = {
   FAILED: XCircle,
 }
 
-export default async function ServerLogPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ServerLogPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ page?: string }>
+}) {
   const { id } = await params
+  const { page: pageParam } = await searchParams
   const admin = await requireAdmin()
   const server = await getOwnedServer(admin, id)
 
-  const interactions = await prisma.interaction.findMany({
-    where: { serverId: server.id },
-    orderBy: { createdAt: 'desc' },
-    take: 50,
-  })
+  const page = Math.max(1, Number(pageParam) || 1)
+
+  const [interactions, total] = await Promise.all([
+    prisma.interaction.findMany({
+      where: { serverId: server.id },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.interaction.count({ where: { serverId: server.id } }),
+  ])
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div>
@@ -126,6 +145,30 @@ export default async function ServerLogPage({ params }: { params: Promise<{ id: 
           )
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between text-sm">
+          <Link
+            href={`/servers/${server.id}/log?page=${page - 1}`}
+            aria-disabled={page <= 1}
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
+          >
+            <ChevronLeft className="size-4" />
+            Previous
+          </Link>
+          <span className="text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
+          <Link
+            href={`/servers/${server.id}/log?page=${page + 1}`}
+            aria-disabled={page >= totalPages}
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
+          >
+            Next
+            <ChevronRight className="size-4" />
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

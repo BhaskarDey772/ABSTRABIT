@@ -38,5 +38,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Excludes Next internals, favicon, and any static file (svg/png/etc. in
+  // public/) — without the extension exclusion, unauthenticated requests for
+  // public assets (e.g. the login page's own background image) get redirected
+  // to /login instead of served, since they don't match isAuthRoute/isApiRoute.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)'],
 }
