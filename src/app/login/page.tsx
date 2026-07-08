@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 export default function LoginPage() {
   async function signIn() {
@@ -17,10 +17,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-950 p-4">
+    <main className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Discord Bot Admin</CardTitle>
+          <CardDescription>Sign in to manage connected servers and commands.</CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={signIn} className="w-full">

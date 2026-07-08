@@ -3,8 +3,15 @@ import { getOwnedServer } from '@/lib/servers'
 import { prisma } from '@/lib/prisma'
 import { fetchGuildChannels } from '@/lib/discord/api'
 import { updateServerSettings, updateCommandConfig } from './actions'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 const TEXT_CHANNEL = 0
+
+const selectClass =
+  'h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
 
 export default async function ServerConfigPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -19,101 +26,117 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-8">
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Server settings</h2>
-        <form action={updateServerSettings} className="space-y-3">
-          <input type="hidden" name="serverId" value={server.id} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Server settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={updateServerSettings} className="space-y-4">
+            <input type="hidden" name="serverId" value={server.id} />
 
-          <label className="block text-sm">
-            Reply channel
-            <select
-              name="replyChannelId"
-              defaultValue={server.replyChannelId ?? ''}
-              className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 p-2"
-            >
-              <option value="">(interaction reply only, no channel post)</option>
-              {textChannels.map((c) => (
-                <option key={c.id} value={c.id}>
-                  #{c.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            <div className="space-y-1.5">
+              <Label htmlFor="replyChannelId">Reply channel</Label>
+              <select
+                id="replyChannelId"
+                name="replyChannelId"
+                defaultValue={server.replyChannelId ?? ''}
+                className={selectClass}
+              >
+                <option value="">(interaction reply only, no channel post)</option>
+                {textChannels.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    #{c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <label className="block text-sm">
-            Mirror type
-            <select
-              name="mirrorType"
-              defaultValue={server.mirrorType}
-              className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 p-2"
-            >
-              <option value="SLACK">Slack</option>
-              <option value="DISCORD">Discord</option>
-            </select>
-          </label>
+            <div className="space-y-1.5">
+              <Label htmlFor="mirrorType">Mirror type</Label>
+              <select id="mirrorType" name="mirrorType" defaultValue={server.mirrorType} className={selectClass}>
+                <option value="SLACK">Slack</option>
+                <option value="DISCORD">Discord</option>
+              </select>
+            </div>
 
-          <label className="block text-sm">
-            Mirror webhook URL
-            <input
-              type="url"
-              name="mirrorWebhookUrl"
-              defaultValue={server.mirrorWebhookUrl ?? ''}
-              placeholder="https://hooks.slack.com/services/... or https://discord.com/api/webhooks/..."
-              className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 p-2"
-            />
-          </label>
+            <div className="space-y-1.5">
+              <Label htmlFor="mirrorWebhookUrl">Mirror webhook URL</Label>
+              <Input
+                id="mirrorWebhookUrl"
+                type="url"
+                name="mirrorWebhookUrl"
+                defaultValue={server.mirrorWebhookUrl ?? ''}
+                placeholder="https://hooks.slack.com/services/... or https://discord.com/api/webhooks/..."
+              />
+            </div>
 
-          <button className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm hover:bg-indigo-500">Save</button>
-        </form>
-      </section>
+            <Button type="submit">Save</Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <section>
+      <div>
         <h2 className="mb-3 text-lg font-semibold">Commands</h2>
         <div className="space-y-4">
           {commands.map((c) => (
-            <form
-              key={c.id}
-              action={updateCommandConfig}
-              className="space-y-2 rounded-md border border-neutral-800 p-4"
-            >
-              <input type="hidden" name="serverId" value={server.id} />
-              <input type="hidden" name="commandName" value={c.commandName} />
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-sm">/{c.commandName}</span>
-                <label className="flex items-center gap-1 text-xs">
-                  <input type="checkbox" name="enabled" defaultChecked={c.enabled} /> enabled
-                </label>
-              </div>
+            <Card key={c.id}>
+              <CardContent>
+                <form action={updateCommandConfig} className="space-y-4">
+                  <input type="hidden" name="serverId" value={server.id} />
+                  <input type="hidden" name="commandName" value={c.commandName} />
 
-              <label className="block text-sm">
-                Response template
-                <input
-                  type="text"
-                  name="responseTemplate"
-                  defaultValue={c.responseTemplate}
-                  className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 p-2"
-                />
-              </label>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-sm">/{c.commandName}</span>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        name="enabled"
+                        defaultChecked={c.enabled}
+                        className="accent-primary"
+                      />
+                      enabled
+                    </label>
+                  </div>
 
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="aiEnabled" defaultChecked={c.aiEnabled} /> AI tagging/summary
-              </label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`responseTemplate-${c.id}`}>Response template</Label>
+                    <Input
+                      id={`responseTemplate-${c.id}`}
+                      type="text"
+                      name="responseTemplate"
+                      defaultValue={c.responseTemplate}
+                    />
+                  </div>
 
-              <label className="block text-sm">
-                Flag keywords (comma-separated, marks a report high-priority)
-                <input
-                  type="text"
-                  name="flagKeywords"
-                  defaultValue={c.flagKeywords.join(', ')}
-                  className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 p-2"
-                />
-              </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="aiEnabled"
+                      defaultChecked={c.aiEnabled}
+                      className="accent-primary"
+                    />
+                    AI tagging/summary
+                  </label>
 
-              <button className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm hover:bg-indigo-500">Save</button>
-            </form>
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`flagKeywords-${c.id}`}>
+                      Flag keywords (comma-separated, marks a report high-priority)
+                    </Label>
+                    <Input
+                      id={`flagKeywords-${c.id}`}
+                      type="text"
+                      name="flagKeywords"
+                      defaultValue={c.flagKeywords.join(', ')}
+                    />
+                  </div>
+
+                  <Button type="submit">Save</Button>
+                </form>
+              </CardContent>
+            </Card>
           ))}
         </div>
-      </section>
+      </div>
     </div>
   )
 }

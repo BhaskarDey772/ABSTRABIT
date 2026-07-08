@@ -3,7 +3,14 @@
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { createClient } from '@/lib/supabase/server'
 import { fetchManageableGuilds, fetchBotGuildIds } from '@/lib/discord/api'
+
+export async function signOutAction() {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  redirect('/login')
+}
 
 export async function connectServer(formData: FormData) {
   const admin = await requireAdmin()
