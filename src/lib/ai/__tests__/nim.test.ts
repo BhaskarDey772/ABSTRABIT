@@ -10,15 +10,9 @@ vi.mock('openai', () => ({
 
 const { triageReport } = await import('../nim')
 
-function toolCallResponse(tag: string, summary: string) {
+function jsonContentResponse(tag: string, summary: string) {
   return {
-    choices: [
-      {
-        message: {
-          tool_calls: [{ type: 'function', function: { arguments: JSON.stringify({ tag, summary }) } }],
-        },
-      },
-    ],
+    choices: [{ message: { content: JSON.stringify({ tag, summary }) } }],
   }
 }
 
@@ -32,7 +26,7 @@ beforeEach(() => {
 
 describe('triageReport', () => {
   it('uses the primary model when it succeeds, never calling the fallback', async () => {
-    createMock.mockResolvedValueOnce(toolCallResponse('bug', 'a bug report'))
+    createMock.mockResolvedValueOnce(jsonContentResponse('bug', 'a bug report'))
 
     const { result, failed } = await triageReport('the app crashed')
 
@@ -44,7 +38,7 @@ describe('triageReport', () => {
   it('falls back to the secondary model when the primary fails', async () => {
     createMock
       .mockRejectedValueOnce(new Error('primary timed out'))
-      .mockResolvedValueOnce(toolCallResponse('feedback', 'a suggestion'))
+      .mockResolvedValueOnce(jsonContentResponse('feedback', 'a suggestion'))
 
     const { result, failed } = await triageReport('please add dark mode')
 
@@ -61,5 +55,22 @@ describe('triageReport', () => {
     expect(failed).toBe(true)
     expect(result).toBeNull()
     expect(createMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('extracts JSON even when the model wraps it in prose (reasoning models do this)', async () => {
+    createMock.mockResolvedValueOnce({
+      choices: [
+        {
+          message: {
+            content: 'Sure, here is the triage:\n\n{"tag": "bug", "summary": "a bug report"}\n\nLet me know if you need more.',
+          },
+        },
+      ],
+    })
+
+    const { result, failed } = await triageReport('the app crashed')
+
+    expect(failed).toBe(false)
+    expect(result).toEqual({ tag: 'bug', summary: 'a bug report' })
   })
 })
