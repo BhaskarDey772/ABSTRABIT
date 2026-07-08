@@ -41,6 +41,7 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
             <div className="space-y-1.5">
               <Label htmlFor="replyChannelId">Reply channel</Label>
               <select
+                key={server.replyChannelId ?? 'none'}
                 id="replyChannelId"
                 name="replyChannelId"
                 defaultValue={server.replyChannelId ?? ''}
@@ -57,7 +58,13 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
 
             <div className="space-y-1.5">
               <Label htmlFor="mirrorType">Mirror type</Label>
-              <select id="mirrorType" name="mirrorType" defaultValue={server.mirrorType} className={selectClass}>
+              <select
+                key={server.mirrorType}
+                id="mirrorType"
+                name="mirrorType"
+                defaultValue={server.mirrorType}
+                className={selectClass}
+              >
                 <option value="SLACK">Slack</option>
                 <option value="DISCORD">Discord</option>
               </select>
@@ -66,6 +73,7 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
             <div className="space-y-1.5">
               <Label htmlFor="mirrorWebhookUrl">Mirror webhook URL</Label>
               <Input
+                key={server.mirrorWebhookUrl ?? 'none'}
                 id="mirrorWebhookUrl"
                 type="url"
                 name="mirrorWebhookUrl"
@@ -105,6 +113,7 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
                   <div className="space-y-1.5">
                     <Label htmlFor={`responseTemplate-${c.id}`}>Response template</Label>
                     <Input
+                      key={c.responseTemplate}
                       id={`responseTemplate-${c.id}`}
                       type="text"
                       name="responseTemplate"
@@ -127,6 +136,7 @@ export default async function ServerConfigPage({ params }: { params: Promise<{ i
                       Flag keywords (comma-separated, marks a report high-priority)
                     </Label>
                     <Input
+                      key={c.flagKeywords.join(',')}
                       id={`flagKeywords-${c.id}`}
                       type="text"
                       name="flagKeywords"
