@@ -46,7 +46,15 @@ See `.env.example` for the full list with inline comments. Summary:
 
 ## Deployment
 
-_TODO once deployed: Vercel project setup, how the Discord Interactions Endpoint URL was registered against the live URL, how env vars were set in the Vercel dashboard, and the Discord OAuth redirect URL registered in the Developer Portal._
+Deployed to Vercel: **https://abstrabit-gamma.vercel.app**
+
+1. Vercel project imported from this repo (GitHub, `main` branch).
+2. Every var in `.env.example` set in Vercel → Project Settings → Environment Variables (same values as local `.env`, with `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` set too — those are the ones exposed to the browser).
+3. `DATABASE_URL`/`DIRECT_URL` point at the same Supabase Postgres used locally — schema was already migrated during development, no separate production migration step needed. (If pointing at a fresh DB instead, run `npm run db:deploy` against it first.)
+4. `postinstall: prisma generate` added to `package.json` — without it, Vercel's build never generates the Prisma client and every DB-touching route breaks silently at runtime even though static pages like `/login` still load.
+5. Discord Developer Portal → Interactions Endpoint URL set to `https://abstrabit-gamma.vercel.app/api/discord/interactions` (Discord PINGs it immediately on save; a bad `DISCORD_PUBLIC_KEY` env var in Vercel would show up here first).
+6. Discord Developer Portal → OAuth2 → Redirects has the Supabase Discord-provider callback URL added (unchanged from local setup — Supabase's callback URL doesn't depend on this app's own domain).
+7. Vercel → Cron Jobs shows the daily retry sweep (`vercel.json`) picked up automatically; requires `CRON_SECRET` to be set in Vercel env vars.
 
 ## Testing it
 
