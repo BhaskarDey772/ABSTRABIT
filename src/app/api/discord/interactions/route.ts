@@ -33,6 +33,16 @@ export async function POST(req: Request) {
 
   const { isNew, row } = await recordOrReplay(interaction, server.id)
 
+  const config = await prisma.commandConfig.findUnique({
+    where: { serverId_commandName: { serverId: server.id, commandName: row.commandName } },
+  })
+  if (config && !config.enabled) {
+    return NextResponse.json({
+      type: ResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: { content: `/${row.commandName} is currently disabled for this server.`, flags: 64 },
+    })
+  }
+
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     if (interaction.data?.name === 'status') return handleStatus(server)
     if (interaction.data?.name === 'report') return handleReportModalOpen()
