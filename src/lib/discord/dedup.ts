@@ -1,14 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { DiscordInteraction, InteractionType, getDiscordUserId } from '@/lib/discord/types'
-
-function resolveCommandName(interaction: DiscordInteraction): string {
-  if (interaction.type === InteractionType.MODAL_SUBMIT) {
-    // custom_id is namespaced like "report_modal" -> "report"
-    return (interaction.data?.custom_id ?? 'unknown').replace(/_modal$/, '')
-  }
-  return interaction.data?.name ?? 'unknown'
-}
+import { DiscordInteraction, getDiscordUserId, resolveCommandName } from '@/lib/discord/types'
 
 /**
  * Records a new interaction, or returns the already-recorded row if this is a

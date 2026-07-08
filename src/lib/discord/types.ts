@@ -41,3 +41,12 @@ export function getDiscordUserId(interaction: DiscordInteraction): string {
   if (!id) throw new Error('interaction has no user id')
   return id
 }
+
+/** Maps an interaction to the CommandConfig.commandName it's governed by. */
+export function resolveCommandName(interaction: DiscordInteraction): string {
+  if (interaction.type === InteractionType.MODAL_SUBMIT) {
+    // custom_id is namespaced like "report_modal" -> "report"
+    return (interaction.data?.custom_id ?? 'unknown').replace(/_modal$/, '')
+  }
+  return interaction.data?.name ?? 'unknown'
+}
