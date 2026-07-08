@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Server" ALTER COLUMN "mirrorType" SET DEFAULT 'DISCORD',
+ALTER COLUMN "mirrorWebhookUrl" DROP NOT NULL;

@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model AdminUser {
+  id                 String   @id
+  discordUserId      String   @unique
+  discordUsername    String
+  // Discord OAuth access token from Supabase's provider_token, used to list
+  // guilds the admin can connect. Not auto-refreshed by Supabase (~1wk expiry) —
+  // documented known limitation, see AI_NOTES.md.
+  discordAccessToken String?
+  createdAt          DateTime @default(now())
+  servers            Server[]
+}
+
+enum MirrorType {
+  SLACK
+  DISCORD
+}
+
+model Server {
+  id               String     @id @default(uuid())
+  discordGuildId   String     @unique
+  guildName        String
+  replyChannelId   String?
+  mirrorType       MirrorType @default(DISCORD)
+  mirrorWebhookUrl String?
+  connectedById    String
+  connectedBy      AdminUser  @relation(fields: [connectedById], references: [id])
+  createdAt        DateTime   @default(now())
+
+  commands     CommandConfig[]
+  interactions Interaction[]
+}
+
+model CommandConfig {
+  id               String   @id @default(uuid())
+  serverId         String
+  server           Server   @relation(fields: [serverId], references: [id])
+  commandName      String
+  enabled          Boolean  @default(true)
+  responseTemplate String   @default("Thanks, logged: {{summary}}")
+  aiEnabled        Boolean  @default(true)
+  flagKeywords     String[] @default([])
+
+  @@unique([serverId, commandName])
+}
+
+enum InteractionStatus {
+  RECEIVED
+  PROCESSING
+  RESPONDED
+  FAILED
+}
+
+enum MirrorStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Interaction {
+  id                   String            @id @default(uuid())
+  discordInteractionId String            @unique
+  serverId             String
+  server               Server            @relation(fields: [serverId], references: [id])
+  commandName          String
+  discordUserId        String
+  rawPayload           Json
+  interactionType      String
+  status               InteractionStatus @default(RECEIVED)
+  ackType              Int?
+  aiTag                String?
+  aiSummary            String?
+  aiFailed             Boolean           @default(false)
+  mirrorStatus         MirrorStatus      @default(PENDING)
+  errorLog             Json?
+  retryCount           Int               @default(0)
+  createdAt            DateTime          @default(now())
+  respondedAt          DateTime?
+  mirroredAt           DateTime?
+}
