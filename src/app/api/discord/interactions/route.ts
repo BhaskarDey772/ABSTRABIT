@@ -28,12 +28,17 @@ export async function POST(req: Request) {
 
   const commandName = resolveCommandName(interaction)
 
-  // Single round trip for both the server lookup and its command config, instead
-  // of two sequential queries — the modal-open path in particular has to answer
-  // Discord fast, and every extra awaited DB call eats into that 3s budget.
+  // Single round trip for the server lookup, its command config, AND /status's
+  // recent-activity read, instead of up to three sequential queries — every
+  // extra awaited DB call eats into Discord's 3s budget, and going through a dev
+  // tunnel + a cold Supabase pooler connection made that margin real, not
+  // theoretical (a /status reply measured 2.5s end to end before this).
   const server = await prisma.server.findUnique({
     where: { discordGuildId: interaction.guild_id },
-    include: { commands: { where: { commandName } } },
+    include: {
+      commands: { where: { commandName } },
+      interactions: { orderBy: { createdAt: 'desc' }, take: 5 },
+    },
   })
   if (!server) {
     return new NextResponse('server not connected', { status: 404 })
@@ -55,7 +60,7 @@ export async function POST(req: Request) {
   // it needs isNew to avoid re-running those effects on a Discord retry.
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     after(() => recordOrReplay(interaction, server.id))
-    if (commandName === 'status') return handleStatus(server)
+    if (commandName === 'status') return handleStatus(server.interactions)
     if (commandName === 'report') return handleReportModalOpen()
     return new NextResponse('unknown command', { status: 400 })
   }

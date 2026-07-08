@@ -1,15 +1,9 @@
-import { prisma } from '@/lib/prisma'
 import { ResponseType } from '@/lib/discord/types'
-import type { Server } from '@prisma/client'
+import type { Interaction } from '@prisma/client'
 
-/** /status — synchronous, no AI, just a read of recent activity for this server. */
-export async function handleStatus(server: Server) {
-  const recent = await prisma.interaction.findMany({
-    where: { serverId: server.id },
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-  })
-
+/** /status — synchronous, no AI. Takes already-fetched rows (see route.ts's combined
+ *  query) instead of querying itself, so this stays a single round trip end to end. */
+export function handleStatus(recent: Pick<Interaction, 'commandName' | 'status' | 'aiTag'>[]) {
   const lines =
     recent.length === 0
       ? ['No commands logged yet.']
