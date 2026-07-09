@@ -29,10 +29,15 @@ export async function connectServer(formData: FormData) {
     throw new Error('not authorized to connect this server, or bot not present')
   }
 
+  // Ownership transfers to whoever most recently connected - they've just been
+  // re-verified above as having real Manage Server access on this guild, so
+  // there's no reason a second legitimate admin should be locked out because
+  // someone else connected it first. (No multi-admin support - one owner at a
+  // time - which is enough for this app, not a gap worth building around.)
   const server = await prisma.server.upsert({
     where: { discordGuildId: guildId },
     create: { discordGuildId: guildId, guildName, connectedById: admin.id },
-    update: { guildName },
+    update: { guildName, connectedById: admin.id },
   })
 
   await prisma.commandConfig.createMany({
