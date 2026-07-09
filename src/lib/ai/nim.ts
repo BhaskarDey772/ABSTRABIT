@@ -12,7 +12,7 @@ const TRIAGE_PROMPT = (text: string) =>
 
 function parseTriageJson(content: string): TriageResult {
   // Reasoning models sometimes wrap the JSON in prose or a code fence despite
-  // instructions — pull out the first {...} block rather than requiring an
+  // instructions - pull out the first {...} block rather than requiring an
   // exact-match response.
   const match = content.match(/\{[\s\S]*\}/)
   if (!match) throw new Error('no JSON object in AI response')

@@ -7,7 +7,7 @@ const STUCK_THRESHOLD_MS = 5 * 60 * 1000
 /**
  * Daily safety-net sweep (Vercel Hobby cron is capped at once/day) for anything
  * that failed and wasn't manually retried from the dashboard. Manual retry is
- * still the fast path — this just guarantees nothing sits broken forever.
+ * still the fast path - this just guarantees nothing sits broken forever.
  */
 export async function GET(request: Request) {
   const auth = request.headers.get('authorization')

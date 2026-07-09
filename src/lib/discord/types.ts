@@ -1,5 +1,5 @@
 // Named explicitly because Discord reuses the same integers across two different
-// enums (e.g. 5 is both an interaction type and a response type) — comparing
+// enums (e.g. 5 is both an interaction type and a response type) - comparing
 // against bare numbers is how that gets mixed up.
 
 export const InteractionType = {

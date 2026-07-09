@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const commandName = resolveCommandName(interaction)
 
   // Single round trip for the server lookup, its command config, AND /status's
-  // recent-activity read, instead of up to three sequential queries — every
+  // recent-activity read, instead of up to three sequential queries - every
   // extra awaited DB call eats into Discord's 3s budget, and going through a dev
   // tunnel + a cold Supabase pooler connection made that margin real, not
   // theoretical (a /status reply measured 2.5s end to end before this).
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   }
 
   // /report's modal-open and /status have no side effects to guard against
-  // duplicates, so their dedup log write doesn't need to block the response —
+  // duplicates, so their dedup log write doesn't need to block the response -
   // it happens after Discord already has its answer. Only the modal *submit*
   // (which does trigger AI/mirror/DB side effects) awaits recordOrReplay, since
   // it needs isNew to avoid re-running those effects on a Discord retry.
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   }
 
   if (interaction.type === InteractionType.MODAL_SUBMIT) {
-    // ackType/status set in this same insert (not a follow-up update) — one
+    // ackType/status set in this same insert (not a follow-up update) - one
     // write instead of two on the path racing Discord's 3s deadline.
     const { isNew, row } = await recordOrReplay(interaction, server.id, {
       ackType: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,

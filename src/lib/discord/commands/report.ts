@@ -47,13 +47,13 @@ export async function handleReportModalSubmit(
   isNew: boolean
 ) {
   if (!isNew) {
-    // Discord retry of an interaction we've already started/finished processing —
+    // Discord retry of an interaction we've already started/finished processing -
     // ack again, don't re-run AI/mirror/DB side effects.
     return Response.json({ type: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE })
   }
 
   // ackType/status were already set on this row by recordOrReplay's insert
-  // (route.ts) — no update needed here before responding.
+  // (route.ts) - no update needed here before responding.
   after(() => processReport(interaction, server, interactionRow))
 
   return Response.json({ type: ResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE })
@@ -89,7 +89,7 @@ export async function processReport(interaction: DiscordInteraction, server: Ser
   try {
     await editDeferredResponse(interaction.token, responseText)
     if (server.replyChannelId) {
-      // Best-effort duplicate post to the configured channel — the interaction
+      // Best-effort duplicate post to the configured channel - the interaction
       // reply above is the required delivery, this is the "and/or a post to the
       // configured channel" half of the core requirement.
       await postChannelMessage(server.replyChannelId, responseText).catch(() => {})

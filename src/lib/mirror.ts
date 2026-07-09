@@ -9,7 +9,7 @@ function buildBody(mirrorType: MirrorType, text: string) {
   return mirrorType === 'SLACK' ? { text } : { content: text }
 }
 
-/** Sends the mirror notification with a few retries. Never throws — caller checks the return value. */
+/** Sends the mirror notification with a few retries. Never throws - caller checks the return value. */
 export async function sendMirror(
   mirrorType: MirrorType,
   webhookUrl: string,

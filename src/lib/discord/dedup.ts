@@ -8,7 +8,7 @@ import { DiscordInteraction, getDiscordUserId, resolveCommandName } from '@/lib/
  * unique constraint, not an app-level check, so it holds under concurrent retries).
  *
  * `initial` lets a caller that's about to defer (e.g. /report's modal submit)
- * set ackType/status in this same insert instead of a follow-up update() —
+ * set ackType/status in this same insert instead of a follow-up update() -
  * one write instead of two on the path that's racing Discord's 3s deadline.
  */
 export async function recordOrReplay(

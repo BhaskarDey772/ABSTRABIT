@@ -75,7 +75,7 @@ export function isStuckProcessing(interaction: Interaction): boolean {
 
 /**
  * Re-drives a /report whose background processing (the after() callback in
- * handleReportModalSubmit) never reached a terminal state — observed in dev when
+ * handleReportModalSubmit) never reached a terminal state - observed in dev when
  * a file-change hot-reload interrupts the in-flight callback; the same gap would
  * open in production if the function crashed or was recycled mid-request. Safe to
  * re-run: AI/mirror aren't side-effecting on our end, and editing the original

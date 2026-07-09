@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import type { ComponentProps } from 'react'
 
 /** Button for use inside a <form action={serverAction}>. Shows a pending state
- *  automatically via useFormStatus — plain shadcn Button gives no feedback at all
+ *  automatically via useFormStatus - plain shadcn Button gives no feedback at all
  *  while a server action is in flight. */
 export function SubmitButton({
   children,

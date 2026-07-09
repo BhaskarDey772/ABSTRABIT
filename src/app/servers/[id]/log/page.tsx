@@ -69,7 +69,7 @@ export default async function ServerLogPage({
   return (
     <div>
       <PageHeader 
-        title={`${server.guildName} — Interaction Log`} 
+        title={`${server.guildName}: Interaction Log`}
         description="Track and manage every bot interaction for this server."
       />
       <div className="max-w-4xl">
