@@ -1,6 +1,18 @@
 import type { ElementType } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, XCircle, Clock, Loader2, RefreshCw, AlertTriangle, ChevronLeft, ChevronRight, Zap } from 'lucide-react'
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Loader2,
+  RefreshCw,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Zap,
+} from 'lucide-react'
 import { requireAdmin } from '@/lib/auth'
 import { getOwnedServer } from '@/lib/servers'
 import { prisma } from '@/lib/prisma'
@@ -188,29 +200,49 @@ export default async function ServerLogPage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-between gap-4">
-            <Link
-              href={`/servers/${server.id}/log?page=${page - 1}`}
-              aria-disabled={page <= 1}
-              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
-            >
-              <ChevronLeft className="size-4" />
-              Previous
-            </Link>
+          <div className="mt-8 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/servers/${server.id}/log?page=1`}
+                aria-disabled={page <= 1}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
+              >
+                <ChevronsLeft className="size-4" />
+                First
+              </Link>
+              <Link
+                href={`/servers/${server.id}/log?page=${page - 1}`}
+                aria-disabled={page <= 1}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
+              >
+                <ChevronLeft className="size-4" />
+                Previous
+              </Link>
+            </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">Page</span>
               <span className="font-semibold">{page}</span>
               <span className="text-muted-foreground">of</span>
               <span className="font-semibold">{totalPages}</span>
             </div>
-            <Link
-              href={`/servers/${server.id}/log?page=${page + 1}`}
-              aria-disabled={page >= totalPages}
-              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/servers/${server.id}/log?page=${page + 1}`}
+                aria-disabled={page >= totalPages}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
+              >
+                Next
+                <ChevronRight className="size-4" />
+              </Link>
+              <Link
+                href={`/servers/${server.id}/log?page=${totalPages}`}
+                aria-disabled={page >= totalPages}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
+              >
+                Last
+                <ChevronsRight className="size-4" />
+              </Link>
+            </div>
           </div>
         )}
       </div>

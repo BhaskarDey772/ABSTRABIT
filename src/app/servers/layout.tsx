@@ -14,9 +14,9 @@ export default async function ServersRootLayout({ children }: { children: React.
   const servers = await prisma.server.findMany({ where: { connectedById: admin.id } })
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
-      <aside className="w-[72px] shrink-0 border-r border-border bg-card/50 flex flex-col items-center gap-3 py-4">
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Sidebar - fixed to the viewport; only <main> below scrolls. */}
+      <aside className="w-[72px] shrink-0 overflow-y-auto border-r border-border bg-card/50 flex flex-col items-center gap-3 py-4">
         <Link
           href="/servers"
           title="Dashboard"
@@ -52,8 +52,8 @@ export default async function ServersRootLayout({ children }: { children: React.
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col">
-        <header className="border-b border-border bg-card/60 backdrop-blur-sm sticky top-0 z-40">
+      <div className="flex-1 flex flex-col min-h-0">
+        <header className="shrink-0 border-b border-border bg-card/60 backdrop-blur-sm z-40">
           <div className="flex items-center justify-between px-8 py-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export default async function ServersRootLayout({ children }: { children: React.
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto">
+        <main className="min-h-0 flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
