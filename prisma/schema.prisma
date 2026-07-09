@@ -13,7 +13,7 @@ model AdminUser {
   discordUserId      String   @unique
   discordUsername    String
   // Discord OAuth access token from Supabase's provider_token, used to list
-  // guilds the admin can connect. Not auto-refreshed by Supabase (~1wk expiry) —
+  // guilds the admin can connect. Not auto-refreshed by Supabase (~1wk expiry) -
   // documented known limitation, see AI_NOTES.md.
   discordAccessToken String?
   createdAt          DateTime @default(now())
