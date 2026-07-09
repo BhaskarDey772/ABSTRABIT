@@ -58,4 +58,13 @@ Deployed to Vercel: **https://abstrabit-gamma.vercel.app**
 
 ## Testing it
 
-_TODO: test server invite link, throwaway admin login, which commands to try, expected mirror-channel behavior._
+**Bot commands** - join the test server and run these with your own Discord account, no special permission needed:
+
+1. Join: https://discord.gg/GHSpejZ2D
+2. In the server, run:
+   - `/status` - replies immediately with the 5 most recent commands.
+   - `/report` - opens a modal; type anything and submit. It defers, then edits in an AI-tagged reply within a few seconds. A copy is also posted to the configured reply channel, and mirrored to the second channel (`#mirror-log` in Discord, or Slack, see the Config tab for which one's active).
+
+**Admin dashboard** (`https://abstrabit-gamma.vercel.app`) requires `Manage Server` on the connected guild, so it isn't something a random visiting account can access - rather than share a live login, see the recorded walkthrough: _TODO: add video link_. It covers connecting a server, the Log tab (including a failed/retried interaction), and the Config tab.
+
+**Unhappy paths, if you want to poke at them directly**: an unsigned request to `/api/discord/interactions` returns 401; resubmitting the same report interaction twice doesn't double-fire AI/mirror side effects (dedup); any row that fails (AI or mirror) shows a retry button on the Log tab instead of silently disappearing.
