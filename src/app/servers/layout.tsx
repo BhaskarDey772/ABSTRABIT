@@ -14,48 +14,69 @@ export default async function ServersRootLayout({ children }: { children: React.
   const servers = await prisma.server.findMany({ where: { connectedById: admin.id } })
 
   return (
-    <div className="flex min-h-screen">
-      {/* Discord-style icon rail: one circle per connected server, "+" to connect another. */}
-      <aside className="flex w-[72px] shrink-0 flex-col items-center gap-2 bg-sidebar py-3">
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar */}
+      <aside className="w-[72px] shrink-0 border-r border-border bg-card/50 flex flex-col items-center gap-3 py-4">
+        <Link
+          href="/servers"
+          title="Dashboard"
+          className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105"
+        >
+          <Bot className="size-5" />
+        </Link>
+        
+        <div className="h-px w-8 bg-border" />
+        
         {servers.map((s) => (
           <Link
             key={s.id}
             href={`/servers/${s.id}/log`}
             title={s.guildName}
-            className="flex size-12 items-center justify-center rounded-3xl bg-secondary text-sm font-semibold text-secondary-foreground shadow-sm transition-all hover:rounded-2xl hover:bg-primary hover:text-primary-foreground"
+            className="flex size-11 items-center justify-center rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground shadow-md hover:shadow-lg transition-all hover:bg-accent hover:text-accent-foreground group relative"
           >
             {initials(s.guildName)}
+            <div className="absolute left-full ml-2 hidden group-hover:block bg-popover text-popover-foreground text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+              {s.guildName}
+            </div>
           </Link>
         ))}
-        <div className="my-1 h-px w-8 bg-sidebar-border" />
-        <Link
-          href="/servers/connect"
-          title="Connect a server"
-          className="flex size-12 items-center justify-center rounded-3xl bg-secondary text-emerald-400 shadow-sm transition-all hover:rounded-2xl hover:bg-emerald-500 hover:text-white"
-        >
-          <Plus className="size-5" />
-        </Link>
+        
+        <div className="mt-auto">
+          <Link
+            href="/servers/connect"
+            title="Connect a server"
+            className="flex size-11 items-center justify-center rounded-xl bg-secondary/50 text-accent shadow-md hover:shadow-lg transition-all hover:bg-accent hover:text-accent-foreground"
+          >
+            <Plus className="size-5" />
+          </Link>
+        </div>
       </aside>
 
-      <div className="flex-1">
-        <header className="border-b border-border bg-card/40">
-          <div className="flex items-center justify-between px-10 py-4">
-            <Link href="/servers" className="flex items-center gap-2 font-semibold">
-              <Bot className="size-5 text-primary" />
-              Discord Bot Admin
-            </Link>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <span>{admin.discordUsername}</span>
+      <div className="flex-1 flex flex-col">
+        <header className="border-b border-border bg-card/60 backdrop-blur-sm sticky top-0 z-40">
+          <div className="flex items-center justify-between px-8 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-bold text-foreground">Bot Admin</h1>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50">
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                <span className="text-xs text-muted-foreground">{admin.discordUsername}</span>
+              </div>
               <form action={signOutAction}>
-                <SubmitButton variant="outline" size="sm" pendingText="Signing out…">
+                <SubmitButton variant="ghost" size="sm" pendingText="Signing out…" className="gap-2">
                   <LogOut className="size-4" />
-                  Sign out
+                  <span className="hidden sm:inline">Sign out</span>
                 </SubmitButton>
               </form>
             </div>
           </div>
         </header>
-        {children}
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
       </div>
     </div>
   )

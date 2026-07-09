@@ -1,6 +1,6 @@
 import type { ElementType } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, XCircle, Clock, Loader2, RefreshCw, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CheckCircle2, XCircle, Clock, Loader2, RefreshCw, AlertTriangle, ChevronLeft, ChevronRight, Zap } from 'lucide-react'
 import { requireAdmin } from '@/lib/auth'
 import { getOwnedServer } from '@/lib/servers'
 import { prisma } from '@/lib/prisma'
@@ -56,119 +56,164 @@ export default async function ServerLogPage({
 
   return (
     <div>
-      <PageHeader title={`${server.guildName} — command log`} description="Every interaction the bot has received for this server, most recent first." />
-      <div className="space-y-3">
-        {interactions.length === 0 && <p className="text-muted-foreground">Nothing logged yet.</p>}
-        {interactions.map((i) => {
-          const StatusIcon = statusIcon[i.status]
-          return (
-            <Card key={i.id}>
-              <CardContent>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-sm">/{i.commandName}</span>
-                  <Badge variant={statusVariant[i.status]} className="gap-1">
-                    <StatusIcon className={`size-3 ${i.status === 'PROCESSING' ? 'animate-spin' : ''}`} />
-                    {i.status}
-                  </Badge>
-                  {i.aiTag && <Badge variant="secondary">{i.aiTag}</Badge>}
-                  {i.aiFailed && (
-                    <Badge variant="destructive" className="gap-1">
-                      <AlertTriangle className="size-3" />
-                      AI failed, rule-only
-                    </Badge>
-                  )}
-                  {i.mirrorStatus === 'FAILED' && (
-                    <Badge variant="destructive" className="gap-1">
-                      <AlertTriangle className="size-3" />
-                      mirror failed
-                    </Badge>
-                  )}
-                  {isStuckProcessing(i) && (
-                    <Badge variant="destructive" className="gap-1">
-                      <AlertTriangle className="size-3" />
-                      stuck processing
-                    </Badge>
-                  )}
-                  {i.retryCount > 0 && (
-                    <span className="text-xs text-muted-foreground">retries: {i.retryCount}</span>
-                  )}
-                  <span className="ml-auto text-xs text-muted-foreground">{i.createdAt.toLocaleString()}</span>
-                </div>
+      <PageHeader 
+        title={`${server.guildName} — Interaction Log`} 
+        description="Track and manage every bot interaction for this server."
+      />
+      <div className="max-w-4xl">
+        {interactions.length === 0 ? (
+          <Card className="border-dashed border-2">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Zap className="size-10 text-muted-foreground mb-3 opacity-50" />
+              <p className="text-muted-foreground">No interactions logged yet.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {interactions.map((i) => {
+              const StatusIcon = statusIcon[i.status]
+              const hasIssues = i.mirrorStatus === 'FAILED' || i.aiFailed || isStuckProcessing(i)
+              
+              return (
+                <Card key={i.id} className={cn('border border-border/50 transition-colors', hasIssues && 'border-destructive/30 bg-destructive/5')}>
+                  <CardContent className="pt-4">
+                    <div className="space-y-3">
+                      {/* Header row */}
+                      <div className="flex flex-wrap items-center gap-2 justify-between">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <code className="font-mono text-sm font-semibold bg-muted/50 px-2.5 py-1.5 rounded">/{i.commandName}</code>
+                          <Badge variant={statusVariant[i.status]} className="gap-1.5">
+                            <StatusIcon className={`size-3.5 ${i.status === 'PROCESSING' ? 'animate-spin' : ''}`} />
+                            {i.status}
+                          </Badge>
+                          {i.retryCount > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              {i.retryCount} retries
+                            </Badge>
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {i.createdAt.toLocaleString()}
+                        </span>
+                      </div>
 
-                {i.aiSummary && <p className="mt-2 text-sm text-foreground">{i.aiSummary}</p>}
+                      {/* Tags and status badges */}
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {i.aiTag && (
+                          <Badge variant="secondary" className="text-xs">
+                            {i.aiTag}
+                          </Badge>
+                        )}
+                        {i.aiFailed && (
+                          <Badge variant="destructive" className="gap-1 text-xs">
+                            <AlertTriangle className="size-3" />
+                            AI failed
+                          </Badge>
+                        )}
+                        {i.mirrorStatus === 'FAILED' && (
+                          <Badge variant="destructive" className="gap-1 text-xs">
+                            <AlertTriangle className="size-3" />
+                            Mirror failed
+                          </Badge>
+                        )}
+                        {isStuckProcessing(i) && (
+                          <Badge variant="destructive" className="gap-1 text-xs">
+                            <AlertTriangle className="size-3" />
+                            Stuck
+                          </Badge>
+                        )}
+                      </div>
 
-                {(i.mirrorStatus === 'FAILED' || i.aiFailed || isStuckProcessing(i)) && (
-                  <div className="mt-3 flex gap-2">
-                    {isStuckProcessing(i) && (
-                      <form action={retryStuckReportAction}>
-                        <input type="hidden" name="interactionId" value={i.id} />
-                        <input type="hidden" name="serverId" value={server.id} />
-                        <SubmitButton variant="secondary" size="sm" pendingText="Retrying…" className="gap-1.5">
-                          <RefreshCw className="size-3.5" />
-                          Retry report
-                        </SubmitButton>
-                      </form>
-                    )}
-                    {i.mirrorStatus === 'FAILED' && (
-                      <form action={retryMirrorAction}>
-                        <input type="hidden" name="interactionId" value={i.id} />
-                        <input type="hidden" name="serverId" value={server.id} />
-                        <SubmitButton variant="secondary" size="sm" pendingText="Retrying…" className="gap-1.5">
-                          <RefreshCw className="size-3.5" />
-                          Retry mirror
-                        </SubmitButton>
-                      </form>
-                    )}
-                    {i.aiFailed && (
-                      <form action={retryAiTagAction}>
-                        <input type="hidden" name="interactionId" value={i.id} />
-                        <input type="hidden" name="serverId" value={server.id} />
-                        <SubmitButton variant="secondary" size="sm" pendingText="Retrying…" className="gap-1.5">
-                          <RefreshCw className="size-3.5" />
-                          Retry AI tagging
-                        </SubmitButton>
-                      </form>
-                    )}
-                  </div>
-                )}
+                      {/* Summary */}
+                      {i.aiSummary && (
+                        <p className="text-sm text-foreground bg-muted/30 rounded p-3 border border-muted/50">
+                          {i.aiSummary}
+                        </p>
+                      )}
 
-                {i.errorLog != null && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-xs text-muted-foreground">error details</summary>
-                    <pre className="mt-1 overflow-x-auto rounded-md bg-muted p-2 text-xs text-muted-foreground">
-                      {JSON.stringify(i.errorLog, null, 2)}
-                    </pre>
-                  </details>
-                )}
-              </CardContent>
-            </Card>
-          )
-        })}
+                      {/* Action buttons */}
+                      {hasIssues && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {isStuckProcessing(i) && (
+                            <form action={retryStuckReportAction}>
+                              <input type="hidden" name="interactionId" value={i.id} />
+                              <input type="hidden" name="serverId" value={server.id} />
+                              <SubmitButton variant="secondary" size="sm" pendingText="Retrying…" className="gap-1.5">
+                                <RefreshCw className="size-3.5" />
+                                <span className="hidden sm:inline">Retry Report</span>
+                              </SubmitButton>
+                            </form>
+                          )}
+                          {i.mirrorStatus === 'FAILED' && (
+                            <form action={retryMirrorAction}>
+                              <input type="hidden" name="interactionId" value={i.id} />
+                              <input type="hidden" name="serverId" value={server.id} />
+                              <SubmitButton variant="secondary" size="sm" pendingText="Retrying…" className="gap-1.5">
+                                <RefreshCw className="size-3.5" />
+                                <span className="hidden sm:inline">Retry Mirror</span>
+                              </SubmitButton>
+                            </form>
+                          )}
+                          {i.aiFailed && (
+                            <form action={retryAiTagAction}>
+                              <input type="hidden" name="interactionId" value={i.id} />
+                              <input type="hidden" name="serverId" value={server.id} />
+                              <SubmitButton variant="secondary" size="sm" pendingText="Retrying…" className="gap-1.5">
+                                <RefreshCw className="size-3.5" />
+                                <span className="hidden sm:inline">Retry AI</span>
+                              </SubmitButton>
+                            </form>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Error details */}
+                      {i.errorLog != null && (
+                        <details className="pt-2">
+                          <summary className="cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                            Show error details
+                          </summary>
+                          <pre className="mt-2 overflow-x-auto rounded-md bg-muted/50 p-3 text-xs text-muted-foreground border border-muted/50 max-h-48 overflow-y-auto">
+                            {JSON.stringify(i.errorLog, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-between gap-4">
+            <Link
+              href={`/servers/${server.id}/log?page=${page - 1}`}
+              aria-disabled={page <= 1}
+              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
+            >
+              <ChevronLeft className="size-4" />
+              Previous
+            </Link>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Page</span>
+              <span className="font-semibold">{page}</span>
+              <span className="text-muted-foreground">of</span>
+              <span className="font-semibold">{totalPages}</span>
+            </div>
+            <Link
+              href={`/servers/${server.id}/log?page=${page + 1}`}
+              aria-disabled={page >= totalPages}
+              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
+            >
+              Next
+              <ChevronRight className="size-4" />
+            </Link>
+          </div>
+        )}
       </div>
-
-      {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between text-sm">
-          <Link
-            href={`/servers/${server.id}/log?page=${page - 1}`}
-            aria-disabled={page <= 1}
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
-          >
-            <ChevronLeft className="size-4" />
-            Previous
-          </Link>
-          <span className="text-muted-foreground">
-            Page {page} of {totalPages}
-          </span>
-          <Link
-            href={`/servers/${server.id}/log?page=${page + 1}`}
-            aria-disabled={page >= totalPages}
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
-          >
-            Next
-            <ChevronRight className="size-4" />
-          </Link>
-        </div>
-      )}
     </div>
   )
 }
