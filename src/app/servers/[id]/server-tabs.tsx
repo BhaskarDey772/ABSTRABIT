@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { LinkStatusIcon } from '@/components/link-status-spinner'
 
 export function ServerTabs({ id }: { id: string }) {
   const pathname = usePathname()
@@ -20,13 +21,13 @@ export function ServerTabs({ id }: { id: string }) {
             key={tab.href}
             href={tab.href}
             className={cn(
-              'border-b-2 px-1 pb-3 text-sm font-medium transition-colors',
+              'flex items-center gap-1.5 border-b-2 px-1 pb-3 text-sm font-medium transition-colors',
               active
                 ? 'border-primary text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             )}
           >
-            {tab.label}
+            <LinkStatusIcon>{tab.label}</LinkStatusIcon>
           </Link>
         )
       })}

@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/page-header'
+import { LinkStatusIcon } from '@/components/link-status-spinner'
 
 export default async function ServersPage() {
   const admin = await requireAdmin()
@@ -19,7 +20,9 @@ export default async function ServersPage() {
           description="Manage your Discord servers and command configurations."
         />
         <Link href="/servers/connect" className={buttonVariants({ size: 'lg', className: 'gap-2' })}>
-          <Plus className="size-5" />
+          <LinkStatusIcon>
+            <Plus className="size-5" />
+          </LinkStatusIcon>
           Connect a server
         </Link>
       </div>
@@ -31,7 +34,9 @@ export default async function ServersPage() {
             <h3 className="text-lg font-semibold text-foreground mb-2">No servers connected</h3>
             <p className="text-muted-foreground mb-6">Connect your first Discord server to get started.</p>
             <Link href="/servers/connect" className={buttonVariants({ variant: 'default' })}>
-              <Plus className="size-4" />
+              <LinkStatusIcon>
+                <Plus className="size-4" />
+              </LinkStatusIcon>
               Connect a server
             </Link>
           </CardContent>
@@ -51,7 +56,9 @@ export default async function ServersPage() {
                         Server Configuration
                       </CardDescription>
                     </div>
-                    <ChevronRight className="size-5 text-muted-foreground group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                    <LinkStatusIcon>
+                      <ChevronRight className="size-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                    </LinkStatusIcon>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">

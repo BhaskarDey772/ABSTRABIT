@@ -24,6 +24,7 @@ import { SubmitButton } from '@/components/submit-button'
 import { buttonVariants } from '@/components/ui/button'
 import { PageHeader } from '@/components/page-header'
 import { cn } from '@/lib/utils'
+import { LinkStatusIcon } from '@/components/link-status-spinner'
 
 const PAGE_SIZE = 20
 
@@ -207,7 +208,9 @@ export default async function ServerLogPage({
                 aria-disabled={page <= 1}
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
               >
-                <ChevronsLeft className="size-4" />
+                <LinkStatusIcon>
+                  <ChevronsLeft className="size-4" />
+                </LinkStatusIcon>
                 First
               </Link>
               <Link
@@ -215,7 +218,9 @@ export default async function ServerLogPage({
                 aria-disabled={page <= 1}
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && 'pointer-events-none opacity-50')}
               >
-                <ChevronLeft className="size-4" />
+                <LinkStatusIcon>
+                  <ChevronLeft className="size-4" />
+                </LinkStatusIcon>
                 Previous
               </Link>
             </div>
@@ -232,7 +237,9 @@ export default async function ServerLogPage({
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
               >
                 Next
-                <ChevronRight className="size-4" />
+                <LinkStatusIcon>
+                  <ChevronRight className="size-4" />
+                </LinkStatusIcon>
               </Link>
               <Link
                 href={`/servers/${server.id}/log?page=${totalPages}`}
@@ -240,7 +247,9 @@ export default async function ServerLogPage({
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && 'pointer-events-none opacity-50')}
               >
                 Last
-                <ChevronsRight className="size-4" />
+                <LinkStatusIcon>
+                  <ChevronsRight className="size-4" />
+                </LinkStatusIcon>
               </Link>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/auth'
 import { signOutAction } from './actions'
 import { prisma } from '@/lib/prisma'
 import { SubmitButton } from '@/components/submit-button'
+import { LinkStatusIcon } from '@/components/link-status-spinner'
 
 function initials(name: string): string {
   return name.trim().slice(0, 2).toUpperCase()
@@ -22,32 +23,36 @@ export default async function ServersRootLayout({ children }: { children: React.
           title="Dashboard"
           className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105"
         >
-          <Bot className="size-5" />
+          <LinkStatusIcon>
+            <Bot className="size-5" />
+          </LinkStatusIcon>
         </Link>
-        
+
         <div className="h-px w-8 bg-border" />
-        
+
         {servers.map((s) => (
           <Link
             key={s.id}
             href={`/servers/${s.id}/log`}
             title={s.guildName}
-            className="flex size-11 items-center justify-center rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground shadow-md hover:shadow-lg transition-all hover:bg-accent hover:text-accent-foreground group relative"
+            className="group relative flex size-11 items-center justify-center rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground shadow-md transition-all hover:bg-accent hover:text-accent-foreground hover:shadow-lg"
           >
-            {initials(s.guildName)}
-            <div className="absolute left-full ml-2 hidden group-hover:block bg-popover text-popover-foreground text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+            <LinkStatusIcon>{initials(s.guildName)}</LinkStatusIcon>
+            <div className="pointer-events-none absolute left-full ml-2 hidden whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground group-hover:block">
               {s.guildName}
             </div>
           </Link>
         ))}
-        
+
         <div className="mt-auto">
           <Link
             href="/servers/connect"
             title="Connect a server"
-            className="flex size-11 items-center justify-center rounded-xl bg-secondary/50 text-accent shadow-md hover:shadow-lg transition-all hover:bg-accent hover:text-accent-foreground"
+            className="flex size-11 items-center justify-center rounded-xl bg-secondary/50 text-accent shadow-md transition-all hover:bg-accent hover:text-accent-foreground hover:shadow-lg"
           >
-            <Plus className="size-5" />
+            <LinkStatusIcon>
+              <Plus className="size-5" />
+            </LinkStatusIcon>
           </Link>
         </div>
       </aside>
@@ -74,9 +79,7 @@ export default async function ServersRootLayout({ children }: { children: React.
             </div>
           </div>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   )

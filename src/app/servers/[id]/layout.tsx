@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { ServerTabs } from './server-tabs'
+import { LinkStatusIcon } from '@/components/link-status-spinner'
 
 export default async function ServerLayout({
   children,
@@ -17,7 +18,9 @@ export default async function ServerLayout({
         href="/servers"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="size-3.5" />
+        <LinkStatusIcon>
+          <ArrowLeft className="size-3.5" />
+        </LinkStatusIcon>
         All servers
       </Link>
       <div className="mb-8">
