@@ -27,7 +27,14 @@ export default function RootLayout({
       lang="en"
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">{children}</body>
+      {/* h-screen + overflow-hidden: the /servers shell owns all intentional scrolling
+          internally (its <main> has overflow-y-auto) - this stops anything portaled
+          straight to <body> (e.g. a Select dropdown) from inflating the document's own
+          height and reviving page-level scroll, which was dragging the sidebar/header
+          along with it. */}
+      <body className="h-screen overflow-hidden flex flex-col bg-background text-foreground">
+        {children}
+      </body>
     </html>
   );
 }
