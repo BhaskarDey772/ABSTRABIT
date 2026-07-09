@@ -1,14 +1,14 @@
-# Discord Slash-Command Bot — Design
+# Discord Slash-Command Bot - Design
 
-Take-home assignment (see `Discord Slash-Command Bot-20260707065152.md` for the original spec). Scoped deliberately above the posted junior level per [[project-comp-target]].
+Take-home assignment (see `Discord Slash-Command Bot-20260707065152.md` for the original spec).
 
 ## Decisions
 
 - **Commands**: `/report <opens modal>` and `/status`.
 - **Multi-tenancy**: every table scoped by our own `Server` row from day one, not hardcoded to one guild.
 - **Admin auth**: Supabase Auth with Discord as the OAuth provider (not hand-rolled OAuth, not email/password). `identify guilds` scope; only guilds where the admin has `MANAGE_GUILD` are connectable.
-- **Stretch goals in scope**: AI triage, multi-server, config-driven command rules (folded into core), `/report` as a modal (MODAL_SUBMIT interaction type). Buttons/MESSAGE_COMPONENT explicitly out of scope — contained work over spread-thin.
-- **AI**: NVIDIA NIM, `llama-3.3-nemotron-super-49b-v1.5` primary / `llama-3.1-nemotron-nano-8b-v1` fallback, tool-calling schema for structured `{tag, summary}`. Chosen over the spec's suggested Gemini/Groq — still free/no-card, but NVIDIA's own tool-calling-tuned flagship on their own platform (documented in `AI_NOTES.md`).
+- **Stretch goals in scope**: AI triage, multi-server, config-driven command rules (folded into core), `/report` as a modal (MODAL_SUBMIT interaction type). Buttons/MESSAGE_COMPONENT explicitly out of scope - contained work over spread-thin.
+- **AI**: NVIDIA NIM, `llama-3.3-nemotron-super-49b-v1.5` primary / `llama-3.1-nemotron-nano-8b-v1` fallback, tool-calling schema for structured `{tag, summary}`. Chosen over the spec's suggested Gemini/Groq - still free/no-card, but NVIDIA's own tool-calling-tuned flagship on their own platform (documented in `AI_NOTES.md`).
 
 ## Stack
 
@@ -81,10 +81,10 @@ enum MirrorStatus { PENDING SENT FAILED }
 
 1. Verify Ed25519 over the raw body (`tweetnacl`, headers `X-Signature-Ed25519`/`X-Signature-Timestamp`) before parsing JSON. Invalid → 401.
 2. `type === 1` (PING) → `{ type: 1 }` immediately, no DB.
-3. Dedup: insert `Interaction` keyed on `discordInteractionId`; unique-violation means a Discord retry — replay stored `ackType`, no side effects re-run.
+3. Dedup: insert `Interaction` keyed on `discordInteractionId`; unique-violation means a Discord retry - replay stored `ackType`, no side effects re-run.
 4. `/status` (type 2): synchronous DB read, respond type `4` directly.
-5. `/report` bare invocation: respond type `9` (open MODAL). Modal submit arrives as its own interaction (type `5`, MODAL_SUBMIT) — goes through steps 1–3 again with a new interaction id. Respond type `5` (DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE) to stop the 3s clock, then via `after()`: run AI, apply `flagKeywords`, update the `Interaction` row, `PATCH` the followup message, fire the mirror webhook.
-   - Note: Discord reuses `5` for both an interaction type and a response type — name the constants, never compare against a bare `5`.
+5. `/report` bare invocation: respond type `9` (open MODAL). Modal submit arrives as its own interaction (type `5`, MODAL_SUBMIT) - goes through steps 1–3 again with a new interaction id. Respond type `5` (DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE) to stop the 3s clock, then via `after()`: run AI, apply `flagKeywords`, update the `Interaction` row, `PATCH` the followup message, fire the mirror webhook.
+   - Note: Discord reuses `5` for both an interaction type and a response type - name the constants, never compare against a bare `5`.
 
 ## AI fallback
 
@@ -96,18 +96,18 @@ Mirror send: ~3 retries with backoff; failure → `errorLog` + `mirrorStatus=FAI
 
 ## Dashboard
 
-- `/login` — Discord OAuth via Supabase.
-- `/servers` — list connected servers; connect flow lists guilds where admin has `MANAGE_GUILD` via `/users/@me/guilds`, cross-checked against guilds the bot token can see.
-- `/servers/[id]` — **Log** tab (paginated `Interaction` list, failures visible) and **Config** tab (per-command enable/template/AI toggle/keywords, reply-channel dropdown fetched via bot token, mirror webhook field).
+- `/login` - Discord OAuth via Supabase.
+- `/servers` - list connected servers; connect flow lists guilds where admin has `MANAGE_GUILD` via `/users/@me/guilds`, cross-checked against guilds the bot token can see.
+- `/servers/[id]` - **Log** tab (paginated `Interaction` list, failures visible) and **Config** tab (per-command enable/template/AI toggle/keywords, reply-channel dropdown fetched via bot token, mirror webhook field).
 
 Client-side Supabase usage is limited to `SUPABASE_PUBLISHABLE_KEY` + the user's own session. Bot token, webhook URLs, NIM keys, and `SUPABASE_SECRET_KEY` are server-only.
 
 ## Testing
 
-Vitest, narrow and targeted rather than a full suite: signature verification (valid/tampered/replayed/missing headers), dedup (side effects don't double-fire on repeat insert), AI fallback (primary fails → fallback called → both fail → `aiFailed` path), `flagKeywords` rule matching in isolation. No e2e — manual real-Discord round-trip is the actual acceptance test before submission.
+Vitest, narrow and targeted rather than a full suite: signature verification (valid/tampered/replayed/missing headers), dedup (side effects don't double-fire on repeat insert), AI fallback (primary fails → fallback called → both fail → `aiFailed` path), `flagKeywords` rule matching in isolation. No e2e - manual real-Discord round-trip is the actual acceptance test before submission.
 
 ## Known, documented scope cuts
 
 - `provider_token` from Supabase's Discord provider isn't auto-refreshed; Discord tokens expire ~1 week. Fine for a demo, would need re-auth handling for a real product.
 - Server-admin relationship is fixed at connect-time, not re-validated against live Discord permissions on every dashboard load.
-- MESSAGE_COMPONENT (buttons) interaction type not implemented — explicit scope cut for contained work over spread-thin, given the 72h window.
+- MESSAGE_COMPONENT (buttons) interaction type not implemented - explicit scope cut for contained work over spread-thin, given the 72h window.
