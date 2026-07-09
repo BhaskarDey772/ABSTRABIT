@@ -37,7 +37,7 @@ See `.env.example` for the full list with inline comments. Summary:
 | Var | Purpose |
 |---|---|
 | `DATABASE_URL` / `DIRECT_URL` | Supabase Postgres, pooled (runtime) vs. direct (Prisma migrations) |
-| `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_SECRET_KEY` | Server-side DB/auth client (new key system, not legacy anon/service_role) |
+| `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` | Server-side auth client (new key system, not legacy anon/service_role) |
 | `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Same publishable values, exposed to the browser for the "Sign in with Discord" button |
 | `DISCORD_APPLICATION_ID` / `DISCORD_PUBLIC_KEY` / `DISCORD_BOT_TOKEN` | Bot identity, signature verification, posting messages, command registration |
 | `DISCORD_DEV_GUILD_ID` | Test server id, for instant guild-scoped command registration during dev |
@@ -65,6 +65,10 @@ Deployed to Vercel: **https://abstrabit-gamma.vercel.app**
    - `/status` - replies immediately with the 5 most recent commands.
    - `/report` - opens a modal; type anything and submit. It defers, then edits in an AI-tagged reply within a few seconds. A copy is also posted to the configured reply channel, and mirrored to the second channel (`#mirror-log` in Discord, or Slack, see the Config tab for which one's active).
 
-**Admin dashboard** (`https://abstrabit-gamma.vercel.app`) requires `Manage Server` on the connected guild, so it isn't something a random visiting account can access - rather than share a live login, see the recorded walkthrough: _TODO: add video link_. It covers connecting a server, the Log tab (including a failed/retried interaction), and the Config tab.
+**Admin dashboard** (`https://abstrabit-gamma.vercel.app`) requires `Manage Server` on the connected guild, so a random visiting account can't use it. A throwaway account has already been granted `Manage Server` on the test server and has already connected it, so signing in with it lands straight on the Log/Config pages:
+   - Email: `bhaskardey772+772@gmail.com`
+   - Password: `Bhaskar@7602`
+
+A recorded walkthrough is also available covering the same flow: _TODO: add video link_.
 
 **Unhappy paths, if you want to poke at them directly**: an unsigned request to `/api/discord/interactions` returns 401; resubmitting the same report interaction twice doesn't double-fire AI/mirror side effects (dedup); any row that fails (AI or mirror) shows a retry button on the Log tab instead of silently disappearing.

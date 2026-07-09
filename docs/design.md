@@ -100,7 +100,7 @@ Mirror send: ~3 retries with backoff; failure → `errorLog` + `mirrorStatus=FAI
 - `/servers` - list connected servers; connect flow lists guilds where admin has `MANAGE_GUILD` via `/users/@me/guilds`, cross-checked against guilds the bot token can see.
 - `/servers/[id]` - **Log** tab (paginated `Interaction` list, failures visible) and **Config** tab (per-command enable/template/AI toggle/keywords, reply-channel dropdown fetched via bot token, mirror webhook field).
 
-Client-side Supabase usage is limited to `SUPABASE_PUBLISHABLE_KEY` + the user's own session. Bot token, webhook URLs, NIM keys, and `SUPABASE_SECRET_KEY` are server-only.
+Client-side Supabase usage is limited to `SUPABASE_PUBLISHABLE_KEY` + the user's own session. Bot token, webhook URLs, and NIM keys are server-only.
 
 ## Testing
 
